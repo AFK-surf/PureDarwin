@@ -321,6 +321,7 @@
   icu = callPackage ../pkgs/apple/icucore.nix {
     icuSrc = pkgs.icu.src;
     appleSdk = pkgs.appleSdk;
+    rcodesign = pkgs.rcodesign;
     compilerRt = null;
   };
   installer = callPackage ../pkgs/apps/installer.nix {
