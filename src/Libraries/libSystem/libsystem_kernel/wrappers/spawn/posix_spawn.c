@@ -78,6 +78,14 @@ posix_spawnattr_init(posix_spawnattr_t *attr)
 		err = ENOMEM;
 	} else {
 		/*
+		 * Every field the kernel reads starts at zero; the ones whose default is not zero are set below. Without
+		 * this, the fields not named here (the port, file descriptor and kqworkloop limits, the crash behaviour,
+		 * the launch type, ...) reach posix_spawn with what malloc left in them, and the kernel applies them: a
+		 * file descriptor hard limit of a few, and a process that opens one more is killed (SIGKILL).
+		 */
+		memset(*psattrp, 0, sizeof(struct _posix_spawnattr));
+
+		/*
 		 * The default value of this attribute shall be as if no
 		 * flags were set
 		 */

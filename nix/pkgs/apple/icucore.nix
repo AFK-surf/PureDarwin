@@ -13,6 +13,8 @@
 , libcxxDylib
 , icuSrc
 , appleSdk
+  # install_name_tool rewrites the load commands (page 0) after the linker signed them: signed again after it
+, rcodesign
 }:
 
 let
@@ -97,6 +99,9 @@ stdenv.mkDerivation {
         ${darwinCrossToolchain}/bin/${targetTriple}-install_name_tool \
           -change "$dep" "/usr/lib/$dep" "$f" 2>/dev/null || true
       done
+      # the linker's signature still has the old page 0's hash: the kernel finds that page invalid in every
+      # process that maps ICU (cs_invalid_page), and kills a process that has CS_KILL
+      ${rcodesign}/bin/rcodesign sign "$f"
     done
     ln -s libicuuc.76.1.dylib $out/usr/lib/libicuuc.76.dylib
     ln -s libicudata.76.1.dylib $out/usr/lib/libicudata.76.dylib
